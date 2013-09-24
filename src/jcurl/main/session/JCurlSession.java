@@ -1,15 +1,16 @@
 package jcurl.main.session;
 
 import java.io.IOException;
-import java.net.CookieManager;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jcurl.main.converter.CurlConverter;
 import jcurl.main.converter.CurlObject;
@@ -22,14 +23,14 @@ public class JCurlSession {
 	private Logger log = Logger.getLogger(JCurlSession.class.getName());
 
 	/**
-	 * Map of all current cookies
+	 * Current cookies
 	 */
-	private String cookies;
+	private Map<String, String> currentCookies;
 
 	/**
-	 * Current http url connection
+	 * The current response object
 	 */
-	private HttpURLConnection connection;
+	private CurlResponse curlResponse;
 
 	/**
 	 * The timeout of each curl call
@@ -41,11 +42,12 @@ public class JCurlSession {
 	 * 
 	 */
 	public JCurlSession() {
-
+		currentCookies = new HashMap<String, String>();
 	}
 
 	public JCurlSession(int timeout) {
 		this.timeout = timeout;
+		currentCookies = new HashMap<String, String>();
 	}
 
 	/**
@@ -55,44 +57,121 @@ public class JCurlSession {
 	 * @param curlString
 	 * @throws IOException
 	 */
-	public void callCurl(String curlString) throws IOException {
-		log.info(MessageFormat.format("Calling curl string {0}", curlString));
+	public CurlResponse callCurl(String curlString) {
+		log.fine(MessageFormat.format("Calling curl string {0}", curlString));
 
-		log.info("Converting curl string to curl object");
+		log.fine("Converting curl string to curl object");
 		// convert string to curl object
 		CurlObject curlObject = CurlConverter.convertCurl(curlString);
 
-		log.info("Done converting, creating connection now");
+		log.fine("Done converting, creating connection now");
 
 		// create the connection
 		URL url = curlObject.getUrl();
-		connection = (HttpURLConnection) url.openConnection();
+		OutputStream os = null;
+		try {
+			HttpURLConnection connection = (HttpURLConnection) url
+					.openConnection();
 
-		log.info("Connection created, adding headers now");
+			//set http method
+			connection.setRequestMethod(curlObject.getHttpMethod());
+			
+			
+			log.fine("Connection created, adding headers now");
 
-		// iterate over headers and add to request properties
-		Map<String, String> headers = curlObject.getHeaders();
-		for (String key : headers.keySet()) {
-			connection.setRequestProperty(key, headers.get(key));
+			// iterate over headers and add to request properties
+			Map<String, String> headers = curlObject.getHeaders();
+			for (String key : headers.keySet()) {
+				connection.setRequestProperty(key, headers.get(key));
+			}
+
+			// from previous response object get cookies
+			String cookieString = convertCookiesToString(currentCookies);
+
+			log.fine(MessageFormat
+					.format("Done adding headers, now adding cookies {0}",
+							cookieString));
+
+			// if there are previous cookies set the header
+			if (cookieString != null) {
+				connection.setRequestProperty("Cookie", cookieString);
+			}
+
+			connection.setConnectTimeout(timeout);
+
+			log.fine("Trying to connect to url");
+
+			// connect to the url
+			connection.connect();
+
+			log.fine("Done connection to url, getting output stream");
+
+			os = connection.getOutputStream();
+
+			log.fine("Writing bytes to output stream");
+
+			os.write(curlObject.getData().getBytes());
+
+			log.fine("Done writing bytes, creating response object");
+
+			curlResponse = new CurlResponse(connection);
+
+			log.fine(MessageFormat.format("Done creating response \n{0}\n",
+					curlResponse));
+
+			log.fine("Adding response cookies to current cookies");
+			addCookies(curlResponse.getCookies());
+
+			connection.disconnect();
+
+			return curlResponse;
+		} catch (IOException e) {
+			log.log(Level.SEVERE, "", e);
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					log.log(Level.SEVERE, "", e);
+				}
+			}
 		}
+		return null;
+	}
+	
+	public void addCookie(String key, String value){
+		currentCookies.put(key, value);
+	}
 
-		log.info(MessageFormat.format(
-				"Done adding headers, now adding cookies {0}", cookies));
-
-		// if there are previous cookies set the header
-		if (cookies != null) {
-			connection.setRequestProperty("Cookie", cookies);
+	/**
+	 * Method that takes a cookie string and adds or overwrite if cookie exists
+	 * 
+	 * @param cookieString
+	 */
+	public void addCookies(String cookieString) {
+		String[] cookies = cookieString.split(";");
+		Pattern pattern = Pattern.compile("([^=]*)=(.*)");
+		String key, value;
+		// iterate over every cookie
+		for (String cookie : cookies) {
+			// split cookie on =
+			Matcher m = pattern.matcher(cookie);
+			if (m.find()) {
+				key = m.group(1).trim();
+				value = m.group(2).trim();
+				addCookie(key, value);
+			}
 		}
+	}
 
-		connection.setConnectTimeout(timeout);
+	private String convertCookiesToString(Map<String, String> cookies) {
+		StringBuilder cookieString = new StringBuilder();
+		for (String key : cookies.keySet()) {
+			cookieString.append(key).append("=").append(cookies.get(key)).append(";");
+		}
+		cookieString.deleteCharAt(cookieString.length()-1);
 
-		log.info("Trying to connect to url");
-
-		// connect to the url
-		connection.connect();
-
-		log.info("Done connection to url");
-
+		return cookieString.toString();
 	}
 
 	/**
@@ -103,6 +182,14 @@ public class JCurlSession {
 	 */
 	public void close() throws Throwable {
 		this.finalize();
+	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
 	}
 
 }
