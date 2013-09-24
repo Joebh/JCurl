@@ -1,13 +1,11 @@
 package jcurl.main;
 
-import java.net.CookieManager;
 
 import jcurl.main.session.JCurlSession;
 
 public class JCurl {
 
 	public static void main(String[] args){
-		System.out.println(CookieManager.getDefault());
 	}
 
 	/**

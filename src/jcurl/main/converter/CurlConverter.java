@@ -4,8 +4,7 @@ public class CurlConverter {
 	
 	public static CurlObject convertCurl(String curlString){
 		
-		
-		return null;
+		return new CurlObject();
 	}
 	
 
