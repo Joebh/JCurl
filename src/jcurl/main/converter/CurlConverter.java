@@ -6,29 +6,22 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jcurl.main.converter.tokens.Token;
+
 public class CurlConverter {
+
 
 	public static CurlObject convertCurl(String curlString) {
 		CurlObject curlObject = new CurlObject();
-
-		// parse out all headers
-		curlObject.setHeaders(parseHeaders(curlString));
-
-		return curlObject;
-	}
-
-	private static Map<String, String> parseHeaders(String curlString) {
-		Map<String, String> headers = new HashMap<String, String>();
-		Pattern pattern = Pattern.compile("-H +(['\"])");
-
-		Matcher matcher = pattern.matcher(curlString);
-		while (matcher.find()) {
-			System.out.println(matcher.group(1));
+		CurlLexer lex = new CurlLexer(curlString);
+		
+		Token token = lex.nextToken();
+		while (token != null) {
+			System.out.println(token);
+			token = lex.nextToken();
 		}
 
-		System.out.println(matcher.replaceAll(""));
-		System.exit(1);
-		return null;
+		return curlObject;
 	}
 
 }
