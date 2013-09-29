@@ -12,7 +12,6 @@ public class CurlLexer {
 	private int index;
 	private static final States fsm[][];
 	private static Logger log = Logger.getLogger(CurlLexer.class.getName());
-
 	
 	/**
 	 * Build the fsm used in lexing
@@ -57,8 +56,6 @@ public class CurlLexer {
 
 		fsm[States.DONE_STRING.i][Transitions.SPACE.i] = States.START;
 		fsm[States.DONE_STRING.i][Transitions.EOFTRANSITION.i] = States.START;
-		
-		
 	}
 
 	CurlLexer(String curlString) {
@@ -67,47 +64,19 @@ public class CurlLexer {
 		this.index = 0;
 	}
 
-	public static void main(String[] args) {
-		CurlLexer lex = new CurlLexer(
-				"curl -H 'asfdf' 'asdsdf' \"asdffff\"");
-		
-		for (int i = 0; i < fsm.length; i++) {
-			System.out.print(i + "\t");
-			for (int j = 0; j < fsm[i].length; j++) {
-				System.out.print(fsm[i][j] + " ");
-			}
-			System.out.print("\n");
-		}
-		
-
-		List<Token> tokens = new ArrayList<Token>();
-		Token token;
-		do{
-			token = lex.nextToken();
-			tokens.add(token);
-			log.info(token+"");
-		}
-		while (token.getClass() != EOFToken.class);
-		
-		for(Token tok : tokens){
-			System.out.println(tok);
-		}
-	}
-
 	public Token nextToken() {
-		log.info("NEXT TOKEN CALLED");
+		log.fine("NEXT TOKEN CALLED");
 		States state = States.START;
 		StringBuilder value = new StringBuilder();
 		States previousState = States.START;
-		log.info(state+"");
+		log.fine(state+"");
 		do {			
 			// get next char
 			if(index == curlString.length){
 				return new EOFToken();
 			}
 			String nextChar = curlString[index++] + "";
-			log.info("next char " + nextChar);
-			
+			log.fine("next char " + nextChar);
 			
 			//append char to value
 			value.append(nextChar);
@@ -119,17 +88,17 @@ public class CurlLexer {
 			Transitions[] transitions = state.transitions;
 			boolean matches = false;
 			for(Transitions transition : transitions){
-//				log.info("Trying to match transition " + transition);
+				log.finer("Trying to match transition " + transition);
 				if(nextChar.matches(transition.regex)){
 					matches = true;
-					log.info("Matched " + transition);
+					log.fine("Matched " + transition);
 					state = fsm[state.i][transition.i];
 				}
 			}
 			if(!matches){
 				state = States.ERROR;
 			}
-			log.info("CURRENT STATE " + state+"\tPREVIOUS STATE " + previousState);
+			log.fine("CURRENT STATE " + state+"\tPREVIOUS STATE " + previousState);
 			
 			if(state == States.ERROR){
 				return new ErrorToken();
@@ -148,6 +117,6 @@ public class CurlLexer {
 			return new FlagToken(value.toString());
 		}
 
-		return new ErrorToken();
+		return nextToken();
 	}
 }

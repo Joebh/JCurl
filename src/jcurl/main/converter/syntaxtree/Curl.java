@@ -8,13 +8,30 @@ import jcurl.main.converter.syntaxtree.flags.H;
 import jcurl.main.converter.visitors.BasicVisitor;
 import jcurl.main.converter.visitors.Visitor;
 
-public class Curl implements Acceptor{
-	
+public class Curl implements Acceptor {
+
 	private List<Flag> flags;
 	private URL url;
 	private Method method;
-		
-	public void accept(Visitor visitor){
+
+	public Curl() {
+		super();
+		flags = new ArrayList<Flag>();
+		method = new Method();
+	}
+
+	@Override
+	public String toString() {
+		return "Curl [flags=" + flags + ", url=" + url + ", method=" + method
+				+ "]";
+	}
+
+	public void addFlag(Flag value) {
+		// TODO Auto-generated method stub
+		flags.add(value);
+	}
+
+	public void accept(Visitor visitor) {
 		visitor.accept(this);
 	}
 
@@ -41,7 +58,5 @@ public class Curl implements Acceptor{
 	public void setMethod(Method method) {
 		this.method = method;
 	}
-	
-	
 
 }
