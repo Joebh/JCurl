@@ -73,10 +73,11 @@ public class JCurlSession {
 			HttpURLConnection connection = (HttpURLConnection) url
 					.openConnection();
 
-			//set http method
+			// set http method
 			connection.setRequestMethod(curlObject.getHttpMethod());
-			
-			
+
+			connection.setDoOutput(true);
+
 			log.fine("Connection created, adding headers now");
 
 			// iterate over headers and add to request properties
@@ -110,7 +111,9 @@ public class JCurlSession {
 
 			log.fine("Writing bytes to output stream");
 
-			os.write(curlObject.getData().getBytes());
+			if (curlObject.getData() != null && !curlObject.getData().isEmpty()) {
+				os.write(curlObject.getData().getBytes());
+			}
 
 			log.fine("Done writing bytes, creating response object");
 
@@ -138,8 +141,8 @@ public class JCurlSession {
 		}
 		return null;
 	}
-	
-	public void addCookie(String key, String value){
+
+	public void addCookie(String key, String value) {
 		currentCookies.put(key, value);
 	}
 
@@ -165,11 +168,16 @@ public class JCurlSession {
 	}
 
 	private String convertCookiesToString(Map<String, String> cookies) {
-		StringBuilder cookieString = new StringBuilder();
-		for (String key : cookies.keySet()) {
-			cookieString.append(key).append("=").append(cookies.get(key)).append(";");
+		if (cookies.isEmpty()) {
+			return "";
 		}
-		cookieString.deleteCharAt(cookieString.length()-1);
+		StringBuilder cookieString = new StringBuilder();
+
+		for (String key : cookies.keySet()) {
+			cookieString.append(key).append("=").append(cookies.get(key))
+					.append(";");
+		}
+		cookieString.deleteCharAt(cookieString.length() - 1);
 
 		return cookieString.toString();
 	}

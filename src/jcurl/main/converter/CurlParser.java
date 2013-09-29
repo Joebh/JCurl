@@ -3,6 +3,7 @@ package jcurl.main.converter;
 import java.util.logging.Logger;
 
 import jcurl.main.converter.syntaxtree.Curl;
+import jcurl.main.converter.syntaxtree.Method;
 import jcurl.main.converter.syntaxtree.URL;
 import jcurl.main.converter.syntaxtree.flags.Compressed;
 import jcurl.main.converter.syntaxtree.flags.H;
@@ -27,6 +28,9 @@ public class CurlParser {
 		if (lexer.nextToken().getClass() == CurlToken.class) {
 			Curl curl = new Curl();
 
+			//create basic method
+			curl.setMethod(new Method());
+			
 			Token token;
 			
 			do {

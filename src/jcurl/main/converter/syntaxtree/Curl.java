@@ -5,7 +5,7 @@ import java.util.List;
 
 import jcurl.main.converter.syntaxtree.flags.Compressed;
 import jcurl.main.converter.syntaxtree.flags.H;
-import jcurl.main.converter.visitors.BasicVisitor;
+import jcurl.main.converter.visitors.CurlObjectBuilderVisitor;
 import jcurl.main.converter.visitors.Visitor;
 
 public class Curl implements Acceptor {
@@ -17,7 +17,6 @@ public class Curl implements Acceptor {
 	public Curl() {
 		super();
 		flags = new ArrayList<Flag>();
-		method = new Method();
 	}
 
 	@Override

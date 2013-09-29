@@ -1,6 +1,7 @@
 package jcurl.main.converter;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CurlObject {
@@ -10,8 +11,14 @@ public class CurlObject {
 	private String httpMethod;
 	private String data;
 
-	CurlObject() {
-		httpMethod = "GET";
+	@Override
+	public String toString() {
+		return "CurlObject [url=" + url + ", headers=" + headers
+				+ ", httpMethod=" + httpMethod + ", data=" + data + "]";
+	}
+
+	public CurlObject() {
+		headers = new HashMap<String, String>();
 	}
 
 	public String getHttpMethod() {

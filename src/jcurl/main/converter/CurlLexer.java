@@ -110,7 +110,10 @@ public class CurlLexer {
 			return new CurlToken();
 		}
 		value.deleteCharAt(value.length()-1);
+		
 		if(previousState == States.DONE_STRING){
+			value.deleteCharAt(value.length()-1);
+			value.deleteCharAt(0);
 			return new StringToken(value.toString());
 		}
 		if(previousState == States.AFTER_DASHES){

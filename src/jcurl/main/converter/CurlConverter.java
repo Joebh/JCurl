@@ -10,31 +10,33 @@ import java.util.regex.Pattern;
 import jcurl.main.converter.syntaxtree.Curl;
 import jcurl.main.converter.tokens.EOFToken;
 import jcurl.main.converter.tokens.Token;
-import jcurl.main.converter.visitors.BasicVisitor;
+import jcurl.main.converter.visitors.CurlObjectBuilderVisitor;
 
 /**
  * 
  * @author joebh
- *
+ * 
  */
 public class CurlConverter {
 
-	private static final Logger log = Logger.getLogger(CurlConverter.class.getName());
+	private static final Logger log = Logger.getLogger(CurlConverter.class
+			.getName());
 
 	public static CurlObject convertCurl(String curlString) {
-		CurlObject curlObject = new CurlObject();
 		CurlLexer lex = new CurlLexer(curlString);
 		CurlParser parser = new CurlParser(lex);
-		
-		//generate root of syntax tree
-		Curl curl = parser.parse();
-		
-		log.info(curl.toString());
-		
-		BasicVisitor visitor = new BasicVisitor();
-		curl.accept(visitor);
-		
 
+		// generate root of syntax tree
+		Curl curl = parser.parse();
+
+		log.info(curl.toString());
+
+		CurlObjectBuilderVisitor visitor = new CurlObjectBuilderVisitor();
+		curl.accept(visitor);
+		CurlObject curlObject = visitor.getCurlObject();
+
+		System.out.println(curlObject);
+		
 		return curlObject;
 	}
 
