@@ -7,6 +7,13 @@ public class FlagToken extends Token{
 	public String getType() {
 		return type;
 	}
+	
+	
+
+	@Override
+	public String toString() {
+		return "FlagToken [type=" + type + "]";
+	}
 
 	public void setType(String type) {
 		this.type = type;

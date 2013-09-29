@@ -7,6 +7,15 @@ public class StringToken extends Token {
 	public String getValue() {
 		return value;
 	}
+	
+	
+
+	@Override
+	public String toString() {
+		return "StringToken [value=" + value + "]";
+	}
+
+
 
 	public void setValue(String value) {
 		this.value = value;
