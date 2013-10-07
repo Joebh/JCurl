@@ -169,9 +169,19 @@ public class JCurlSession {
 
 	@Override
 	public String toString() {
-		return "JCurlSession [currentCookies=" + currentCookies
-				+ ", curlResponse=" + curlResponse + ", timeout=" + timeout
-				+ "]";
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("\nRESPONSE OBJECT\n----------------\n");
+		stringBuilder.append(curlResponse);		
+		stringBuilder.append("\n------------\n");
+		
+		stringBuilder.append("CURRENT COOKIES\n----------------\n");
+		for(String key : currentCookies.keySet()){
+			stringBuilder.append(key).append(" : ").append(currentCookies.get(key)).append("\n");
+		}
+		stringBuilder.append("------------\n");
+		
+		return stringBuilder.toString();
+		
 	}
 
 	private String convertCookiesToString(Map<String, String> cookies) {
@@ -188,6 +198,7 @@ public class JCurlSession {
 
 		return cookieString.toString();
 	}
+	
 
 	/**
 	 * Clean up the curl session, should be called after done using a

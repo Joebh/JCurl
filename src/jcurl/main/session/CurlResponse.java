@@ -53,11 +53,21 @@ public class CurlResponse {
 
 	@Override
 	public String toString() {
-		return "CurlResponse [content=" + content + ", headers=" + headers
-				+ ", responseMessage=" + responseMessage + ", responseCode="
-				+ responseCode + ", cookies=" + cookies + ", date=" + date
-				+ ", contentLength=" + contentLength + ", contentType="
-				+ contentType + "]";
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("content : ").append(content).append("\n");
+		stringBuilder.append("responseCode : ").append(responseCode).append("\n");
+		stringBuilder.append("responseMessage : ").append(responseMessage).append("\n");
+		stringBuilder.append("date : ").append(date).append("\n");
+		stringBuilder.append("contentLength : ").append(contentLength).append("\n");
+		stringBuilder.append("contentType : ").append(contentType).append("\n");
+		
+		stringBuilder.append(" ---headers---\n");
+		for(String key : headers.keySet()){
+			stringBuilder.append(key).append(" : ").append(headers.get(key)).append("\n");
+		}
+		stringBuilder.append(" ---end headers---\n");
+		
+		return stringBuilder.toString();
 	}
 
 	public String getContent() {
