@@ -14,9 +14,19 @@ public class CurlObject {
 
 	@Override
 	public String toString() {
-		return "CurlObject [url=" + url + ", headers=" + headers
-				+ ", compressed=" + compressed + ", httpMethod=" + httpMethod
-				+ ", data=" + data + "]";
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("  URL : ").append(url).append("\n");
+		stringBuilder.append("  ***--headers--***\n");
+		for (String key : headers.keySet()) {
+			stringBuilder.append("   ***   ").append(key).append(" : ")
+					.append(headers.get(key)).append("\n");
+		}
+		stringBuilder.append("  ***--end headers--***\n");
+		stringBuilder.append("  Compressed : ").append(compressed).append("\n");
+		stringBuilder.append("  Method : ").append(httpMethod).append("\n");
+		stringBuilder.append("  Data : ").append(data).append("\n");
+
+		return stringBuilder.toString();
 	}
 
 	public boolean isCompressed() {
