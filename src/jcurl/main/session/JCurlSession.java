@@ -294,4 +294,8 @@ public class JCurlSession {
 
 	}
 
+	public CurlResponse getCurlResponse() {
+		return curlResponse;
+	}
+
 }
