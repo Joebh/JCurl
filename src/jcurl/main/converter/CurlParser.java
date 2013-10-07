@@ -61,11 +61,12 @@ public class CurlParser {
 			}
 			if (token.getClass() == StringToken.class) {
 				H h = new H(((StringToken) token).getValue());
-				log.info("Adding H Flag " + h);
+				log.fine("Adding H Flag " + h);
 				curl.addFlag(h);
 			}
 		}
 		if ("--compressed".equals(type)) {
+			log.fine("Adding Compressed Flag");
 			curl.addFlag(new Compressed());
 		}
 	}

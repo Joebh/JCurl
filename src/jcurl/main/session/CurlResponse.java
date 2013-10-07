@@ -1,14 +1,17 @@
 package jcurl.main.session;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 public class CurlResponse {
 
-	private Object content;
+	private String content;
 	private Map<String, List<String>> headers;
 	private String responseMessage;
 	private int responseCode;
@@ -23,7 +26,24 @@ public class CurlResponse {
 		responseMessage = connection.getResponseMessage();
 		cookies = connection.getHeaderField("Set-Cookie");
 		responseCode = connection.getResponseCode();
-		content = connection.getContent();
+
+		// convert input stream to string
+		BufferedReader br = null;
+		if ("gzip".equals(connection.getContentEncoding())) {
+			br = new BufferedReader(new InputStreamReader((new GZIPInputStream(
+					connection.getInputStream()))));
+		} else {
+			br = new BufferedReader(new InputStreamReader(
+					(connection.getInputStream())));
+		}
+
+		StringBuilder outputBuilder = new StringBuilder();
+		String output;
+		while ((output = br.readLine()) != null) {
+			outputBuilder.append(output);
+		}
+
+		content = outputBuilder.toString();
 		date = new Date(connection.getDate());
 		contentLength = connection.getContentLength();
 		contentType = connection.getContentType();
@@ -38,7 +58,7 @@ public class CurlResponse {
 				+ contentType + "]";
 	}
 
-	public Object getContent() {
+	public String getContent() {
 		return content;
 	}
 
