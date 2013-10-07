@@ -47,30 +47,54 @@ public class JCurlSession {
 	private int timeout = 0;
 
 	/**
-	 * Create a new JCurlSession instance
-	 * 
+	 * To replace a variable in curl string, use this as front regex
+	 */
+	private String frontParamDetect = "\\$\\{";
+
+	/**
+	 * To replace a variable in curl string use this as the end of regex
+	 */
+	private String backParamDetect = "\\}";
+
+	/**
+	 * Create a new default JCurlSession instance timeout is infinite/0
+	 * ${variable}
 	 */
 	public JCurlSession() {
 		currentCookies = new HashMap<String, String>();
 	}
 
-	public JCurlSession(int timeout) {
-		this.timeout = timeout;
-		currentCookies = new HashMap<String, String>();
-	}
-	
-	public CurlResponse callCurl(File curlFile, KeyValuePair...args) throws IOException{
+	public CurlResponse callCurl(File curlFile, KeyValuePair... args)
+			throws IOException {
 		FileInputStream fis = new FileInputStream(curlFile);
-		String curlString = new String(IOUtils.readFully(fis, -1, true), Charset.forName("UTF-8"));
+		String curlString = new String(IOUtils.readFully(fis, -1, true),
+				Charset.forName("UTF-8"));
 		log.info(MessageFormat.format("Read curl string {0}", curlString));
 		return callCurl(curlString, args);
 	}
 
+	public String getFrontParamDetect() {
+		return frontParamDetect;
+	}
+
+	public void setFrontParamDetect(String frontParamDetect) {
+		this.frontParamDetect = frontParamDetect;
+	}
+
+	public String getBackParamDetect() {
+		return backParamDetect;
+	}
+
+	public void setBackParamDetect(String backParamDetect) {
+		this.backParamDetect = backParamDetect;
+	}
+
 	public CurlResponse callCurl(String curlString, KeyValuePair... args) {
-		for(KeyValuePair pair : args){
-			curlString = curlString.replaceAll("\\$\\{"+pair.getKey()+"\\}", pair.getValue());	
+		for (KeyValuePair pair : args) {
+			curlString = curlString.replaceAll(frontParamDetect + pair.getKey()
+					+ backParamDetect, pair.getValue());
 		}
-		
+
 		return callCurl(curlString);
 	}
 
