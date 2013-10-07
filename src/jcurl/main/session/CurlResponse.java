@@ -8,10 +8,11 @@ import java.util.Map;
 
 public class CurlResponse {
 
+	private Object content;
 	private Map<String, List<String>> headers;
 	private String responseMessage;
 	private int responseCode;
-	private Object content;
+
 	private String cookies;
 	private Date date;
 	private int contentLength;
@@ -27,15 +28,13 @@ public class CurlResponse {
 		contentLength = connection.getContentLength();
 		contentType = connection.getContentType();
 	}
-	
-	
 
 	@Override
 	public String toString() {
-		return "CurlResponse [headers=" + headers + ", responseMessage="
-				+ responseMessage + ", responseCode=" + responseCode
-				+ ", content=" + content + ", cookies=" + cookies + ", date="
-				+ date + ", contentLength=" + contentLength + ", contentType="
+		return "CurlResponse [content=" + content + ", headers=" + headers
+				+ ", responseMessage=" + responseMessage + ", responseCode="
+				+ responseCode + ", cookies=" + cookies + ", date=" + date
+				+ ", contentLength=" + contentLength + ", contentType="
 				+ contentType + "]";
 	}
 

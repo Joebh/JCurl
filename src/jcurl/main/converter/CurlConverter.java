@@ -35,7 +35,7 @@ public class CurlConverter {
 		curl.accept(visitor);
 		CurlObject curlObject = visitor.getCurlObject();
 
-		System.out.println(curlObject);
+		log.info(curlObject.toString());
 		
 		return curlObject;
 	}

@@ -65,18 +65,18 @@ public class CurlLexer {
 	}
 
 	public Token nextToken() {
-		log.fine("NEXT TOKEN CALLED");
+		log.finest("NEXT TOKEN CALLED");
 		States state = States.START;
 		StringBuilder value = new StringBuilder();
 		States previousState = States.START;
-		log.fine(state+"");
+		log.finest(state+"");
 		do {			
 			// get next char
 			if(index == curlString.length){
 				return new EOFToken();
 			}
 			String nextChar = curlString[index++] + "";
-			log.fine("next char " + nextChar);
+			log.finest("next char " + nextChar);
 			
 			//append char to value
 			value.append(nextChar);
@@ -88,17 +88,17 @@ public class CurlLexer {
 			Transitions[] transitions = state.transitions;
 			boolean matches = false;
 			for(Transitions transition : transitions){
-				log.finer("Trying to match transition " + transition);
+				log.finest("Trying to match transition " + transition);
 				if(nextChar.matches(transition.regex)){
 					matches = true;
-					log.fine("Matched " + transition);
+					log.finest("Matched " + transition);
 					state = fsm[state.i][transition.i];
 				}
 			}
 			if(!matches){
 				state = States.ERROR;
 			}
-			log.fine("CURRENT STATE " + state+"\tPREVIOUS STATE " + previousState);
+			log.finest("CURRENT STATE " + state+"\tPREVIOUS STATE " + previousState);
 			
 			if(state == States.ERROR){
 				return new ErrorToken();
