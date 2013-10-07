@@ -56,6 +56,7 @@ public class CurlResponse {
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("<CURL RESPONSE>\n");
 		stringBuilder.append("content : ").append(content).append("\n");
 		stringBuilder.append("responseCode : ").append(responseCode)
 				.append("\n");
@@ -81,6 +82,7 @@ public class CurlResponse {
 		}
 		stringBuilder.append(" ---end cookies---\n");
 
+		stringBuilder.append("</CURL RESPONSE>\n");
 		return stringBuilder.toString();
 	}
 

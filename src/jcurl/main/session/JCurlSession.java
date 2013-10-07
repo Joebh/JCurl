@@ -8,6 +8,7 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -52,6 +53,14 @@ public class JCurlSession {
 		currentCookies = new HashMap<String, String>();
 	}
 
+	public CurlResponse callCurl(String curlString, KeyValuePair... args) {
+		for(KeyValuePair pair : args){
+			curlString = curlString.replaceAll("\\$\\{"+pair.getKey()+"\\}", pair.getValue());	
+		}
+		
+		return callCurl(curlString);
+	}
+
 	/**
 	 * Input a curl string that would run in command line and return the
 	 * response object
@@ -59,7 +68,7 @@ public class JCurlSession {
 	 * @param curlString
 	 * @throws IOException
 	 */
-	public CurlResponse callCurl(String curlString) {
+	private CurlResponse callCurl(String curlString) {
 		log.fine(MessageFormat.format("Calling curl string {0}", curlString));
 
 		log.fine("Converting curl string to curl object");
@@ -174,16 +183,15 @@ public class JCurlSession {
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("\nRESPONSE OBJECT\n----------------\n");
+		stringBuilder.append("\n<JCURLSESSION>\n");
 		stringBuilder.append(curlResponse);
-		stringBuilder.append("\n------------\n");
 
-		stringBuilder.append("CURRENT COOKIES\n----------------\n");
+		stringBuilder.append(" CURRENT COOKIES\n----------------\n");
 		for (String key : currentCookies.keySet()) {
-			stringBuilder.append(key).append(" : ")
+			stringBuilder.append(" ").append(key).append(" : ")
 					.append(currentCookies.get(key)).append("\n");
 		}
-		stringBuilder.append("------------\n");
+		stringBuilder.append(" ------------\n</JCURLSESSION>\n");
 
 		return stringBuilder.toString();
 
@@ -220,6 +228,33 @@ public class JCurlSession {
 
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
+	}
+
+	public static class KeyValuePair {
+		private String key, value;
+
+		public String getKey() {
+			return key;
+		}
+
+		public void setKey(String key) {
+			this.key = key;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+
+		public KeyValuePair(String key, String value) {
+			super();
+			this.key = key;
+			this.value = value;
+		}
+
 	}
 
 }

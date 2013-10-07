@@ -15,7 +15,7 @@ public class CurlObject {
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("  URL : ").append(url).append("\n");
+		stringBuilder.append("\n  <CURL REQUEST OBJECT>\n  URL : ").append(url).append("\n");
 		stringBuilder.append("  ***--headers--***\n");
 		for (String key : headers.keySet()) {
 			stringBuilder.append("   ***   ").append(key).append(" : ")
@@ -26,6 +26,7 @@ public class CurlObject {
 		stringBuilder.append("  Method : ").append(httpMethod).append("\n");
 		stringBuilder.append("  Data : ").append(data).append("\n");
 
+		stringBuilder.append(" </CURL REQUEST OBJECT>\n");
 		return stringBuilder.toString();
 	}
 
