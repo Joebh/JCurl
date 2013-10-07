@@ -13,6 +13,7 @@ import jcurl.main.converter.syntaxtree.Flag;
 import jcurl.main.converter.syntaxtree.Method;
 import jcurl.main.converter.syntaxtree.URL;
 import jcurl.main.converter.syntaxtree.flags.Compressed;
+import jcurl.main.converter.syntaxtree.flags.Data;
 import jcurl.main.converter.syntaxtree.flags.H;
 
 public class CurlObjectBuilderVisitor implements Visitor {
@@ -68,6 +69,12 @@ public class CurlObjectBuilderVisitor implements Visitor {
 	@Override
 	public void accept(Compressed compressed) {
 		curlObject.setCompressed(true);
+	}
+
+	@Override
+	public void accept(Data data) {
+		// TODO Auto-generated method stub
+		curlObject.setData(data.getData());
 	}
 
 }

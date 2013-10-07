@@ -12,11 +12,16 @@ public class JCurl {
 	public static void main(String[] args){
 		JCurlSession session = createSession();
 		
-		CurlResponse response = session.callCurl(
+		session.callCurl(
 				"curl 'http://www.foodlion.com/' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' -H 'Accept-Encoding: gzip,deflate,sdch' -H 'Host: www.foodlion.com' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.76 Safari/537.36' --compressed"
 				);
 		
-		log.info(response.toString());
+		log.info(session.toString());
+		
+		session.callCurl(
+				"curl 'http://www.foodlion.com/' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Connection: keep-alive' -H 'Accept-Encoding: gzip,deflate,sdch' -H 'Host: www.foodlion.com' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.76 Safari/537.36' --compressed"
+				);
+		log.info(session.toString());
 	}
 
 	/**

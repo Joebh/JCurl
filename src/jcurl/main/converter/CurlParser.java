@@ -6,6 +6,7 @@ import jcurl.main.converter.syntaxtree.Curl;
 import jcurl.main.converter.syntaxtree.Method;
 import jcurl.main.converter.syntaxtree.URL;
 import jcurl.main.converter.syntaxtree.flags.Compressed;
+import jcurl.main.converter.syntaxtree.flags.Data;
 import jcurl.main.converter.syntaxtree.flags.H;
 import jcurl.main.converter.tokens.CurlToken;
 import jcurl.main.converter.tokens.EOFToken;
@@ -68,6 +69,18 @@ public class CurlParser {
 		if ("--compressed".equals(type)) {
 			log.fine("Adding Compressed Flag");
 			curl.addFlag(new Compressed());
+		}
+		
+		if("--data".equals(type)){
+			Token token = lexer.nextToken();
+			if (token.getClass() == ErrorToken.class) {
+				log.severe("Error Parsing Data String");
+			}
+			if (token.getClass() == StringToken.class) {
+				Data data = new Data(((StringToken) token).getValue());
+				log.fine("Adding Data Flag " + data);
+				curl.addFlag(data);
+			}
 		}
 	}
 

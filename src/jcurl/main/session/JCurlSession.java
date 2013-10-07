@@ -167,6 +167,13 @@ public class JCurlSession {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "JCurlSession [currentCookies=" + currentCookies
+				+ ", curlResponse=" + curlResponse + ", timeout=" + timeout
+				+ "]";
+	}
+
 	private String convertCookiesToString(Map<String, String> cookies) {
 		if (cookies.isEmpty()) {
 			return "";
