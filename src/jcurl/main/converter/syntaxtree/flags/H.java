@@ -26,4 +26,9 @@ public class H extends Flag {
 		visitor.accept(this);
 	}
 
+	@Override
+	public String toString() {
+		return "H [value=" + value + "]";
+	}
+
 }

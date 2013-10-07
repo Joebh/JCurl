@@ -25,4 +25,9 @@ public class URL implements Acceptor {
 		visitor.accept(this);
 	}
 
+	@Override
+	public String toString() {
+		return "URL [url=" + url + "]";
+	}
+
 }

@@ -117,7 +117,7 @@ public class JCurlSession {
 
 			log.fine("Done writing bytes, creating response object");
 
-			curlResponse = new CurlResponse(connection);
+			curlResponse = new CurlResponse(connection, curlObject);
 
 			log.fine(MessageFormat.format("Done creating response \n{0}\n",
 					curlResponse));

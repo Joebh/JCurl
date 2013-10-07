@@ -8,13 +8,23 @@ public class CurlObject {
 
 	private URL url;
 	private Map<String, String> headers;
+	private boolean compressed = false;
 	private String httpMethod;
 	private String data;
 
 	@Override
 	public String toString() {
 		return "CurlObject [url=" + url + ", headers=" + headers
-				+ ", httpMethod=" + httpMethod + ", data=" + data + "]";
+				+ ", compressed=" + compressed + ", httpMethod=" + httpMethod
+				+ ", data=" + data + "]";
+	}
+
+	public boolean isCompressed() {
+		return compressed;
+	}
+
+	public void setCompressed(boolean compressed) {
+		this.compressed = compressed;
 	}
 
 	public CurlObject() {

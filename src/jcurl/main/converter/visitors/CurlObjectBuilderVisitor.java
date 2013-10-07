@@ -67,7 +67,7 @@ public class CurlObjectBuilderVisitor implements Visitor {
 
 	@Override
 	public void accept(Compressed compressed) {
-
+		curlObject.setCompressed(true);
 	}
 
 }

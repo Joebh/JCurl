@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
+import jcurl.main.converter.CurlObject;
+
 public class CurlResponse {
 
 	private String content;
@@ -21,7 +23,7 @@ public class CurlResponse {
 	private int contentLength;
 	private String contentType;
 
-	public CurlResponse(HttpURLConnection connection) throws IOException {
+	public CurlResponse(HttpURLConnection connection, CurlObject curlObject) throws IOException {
 		headers = connection.getHeaderFields();
 		responseMessage = connection.getResponseMessage();
 		cookies = connection.getHeaderField("Set-Cookie");
@@ -29,7 +31,7 @@ public class CurlResponse {
 
 		// convert input stream to string
 		BufferedReader br = null;
-		if ("gzip".equals(connection.getContentEncoding())) {
+		if (curlObject.isCompressed() && "gzip".equals(connection.getContentEncoding())) {
 			br = new BufferedReader(new InputStreamReader((new GZIPInputStream(
 					connection.getInputStream()))));
 		} else {

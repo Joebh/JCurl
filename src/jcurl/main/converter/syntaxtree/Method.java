@@ -24,6 +24,11 @@ public class Method implements Acceptor {
 		return type;
 	}
 
+	@Override
+	public String toString() {
+		return "Method [type=" + type + "]";
+	}
+
 	public void setType(String type) {
 		this.type = type;
 	}

@@ -19,5 +19,7 @@ public abstract class Flag implements Acceptor{
 	public void setValue(String value) {
 		this.value = value;
 	}
+	
+	public abstract String toString();
 
 }
