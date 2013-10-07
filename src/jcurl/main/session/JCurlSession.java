@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ import jcurl.main.converter.CurlObject;
 
 public class JCurlSession {
 
+	private final Pattern cookiePattern = Pattern.compile("([^=]*)=(.*)");
 	/**
 	 * Logger
 	 */
@@ -147,23 +149,25 @@ public class JCurlSession {
 	}
 
 	/**
-	 * Method that takes a cookie string and adds or overwrite if cookie exists
+	 * Method that takes a cookie list and adds or overwrite if cookie exists
 	 * 
 	 * @param cookieString
 	 */
-	public void addCookies(String cookieString) {
-		String[] cookies = cookieString.split(";");
-		Pattern pattern = Pattern.compile("([^=]*)=(.*)");
-		String key, value;
-		// iterate over every cookie
+	public void addCookies(List<String> cookies) {
+		if (cookies == null) {
+			return;
+		}
 		for (String cookie : cookies) {
+			String key, value;
+			// iterate over every cookie
 			// split cookie on =
-			Matcher m = pattern.matcher(cookie);
+			Matcher m = cookiePattern.matcher(cookie);
 			if (m.find()) {
 				key = m.group(1).trim();
 				value = m.group(2).trim();
 				addCookie(key, value);
 			}
+
 		}
 	}
 
@@ -171,17 +175,18 @@ public class JCurlSession {
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("\nRESPONSE OBJECT\n----------------\n");
-		stringBuilder.append(curlResponse);		
+		stringBuilder.append(curlResponse);
 		stringBuilder.append("\n------------\n");
-		
+
 		stringBuilder.append("CURRENT COOKIES\n----------------\n");
-		for(String key : currentCookies.keySet()){
-			stringBuilder.append(key).append(" : ").append(currentCookies.get(key)).append("\n");
+		for (String key : currentCookies.keySet()) {
+			stringBuilder.append(key).append(" : ")
+					.append(currentCookies.get(key)).append("\n");
 		}
 		stringBuilder.append("------------\n");
-		
+
 		return stringBuilder.toString();
-		
+
 	}
 
 	private String convertCookiesToString(Map<String, String> cookies) {
@@ -198,7 +203,6 @@ public class JCurlSession {
 
 		return cookieString.toString();
 	}
-	
 
 	/**
 	 * Clean up the curl session, should be called after done using a

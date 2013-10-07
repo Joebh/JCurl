@@ -18,20 +18,22 @@ public class CurlResponse {
 	private String responseMessage;
 	private int responseCode;
 
-	private String cookies;
+	private List<String> cookies;
 	private Date date;
 	private int contentLength;
 	private String contentType;
 
-	public CurlResponse(HttpURLConnection connection, CurlObject curlObject) throws IOException {
+	public CurlResponse(HttpURLConnection connection, CurlObject curlObject)
+			throws IOException {
 		headers = connection.getHeaderFields();
 		responseMessage = connection.getResponseMessage();
-		cookies = connection.getHeaderField("Set-Cookie");
+		cookies = headers.get("Set-Cookie");
 		responseCode = connection.getResponseCode();
 
 		// convert input stream to string
 		BufferedReader br = null;
-		if (curlObject.isCompressed() && "gzip".equals(connection.getContentEncoding())) {
+		if (curlObject.isCompressed()
+				&& "gzip".equals(connection.getContentEncoding())) {
 			br = new BufferedReader(new InputStreamReader((new GZIPInputStream(
 					connection.getInputStream()))));
 		} else {
@@ -55,18 +57,30 @@ public class CurlResponse {
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("content : ").append(content).append("\n");
-		stringBuilder.append("responseCode : ").append(responseCode).append("\n");
-		stringBuilder.append("responseMessage : ").append(responseMessage).append("\n");
+		stringBuilder.append("responseCode : ").append(responseCode)
+				.append("\n");
+		stringBuilder.append("responseMessage : ").append(responseMessage)
+				.append("\n");
 		stringBuilder.append("date : ").append(date).append("\n");
-		stringBuilder.append("contentLength : ").append(contentLength).append("\n");
+		stringBuilder.append("contentLength : ").append(contentLength)
+				.append("\n");
 		stringBuilder.append("contentType : ").append(contentType).append("\n");
-		
+
 		stringBuilder.append(" ---headers---\n");
-		for(String key : headers.keySet()){
-			stringBuilder.append(key).append(" : ").append(headers.get(key)).append("\n");
+		for (String key : headers.keySet()) {
+			stringBuilder.append(key).append(" : ").append(headers.get(key))
+					.append("\n");
 		}
 		stringBuilder.append(" ---end headers---\n");
-		
+
+		stringBuilder.append(" ---cookies---\n");
+		if (cookies != null) {
+			for (String cookie : cookies) {
+				stringBuilder.append(cookie).append("\n");
+			}
+		}
+		stringBuilder.append(" ---end cookies---\n");
+
 		return stringBuilder.toString();
 	}
 
@@ -82,11 +96,11 @@ public class CurlResponse {
 		return headers;
 	}
 
-	public String getCookies() {
+	public List<String> getCookies() {
 		return cookies;
 	}
 
-	public void setCookies(String cookies) {
+	public void setCookies(List<String> cookies) {
 		this.cookies = cookies;
 	}
 
