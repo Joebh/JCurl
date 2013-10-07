@@ -18,10 +18,9 @@ public class JCurl {
 		JCurlSession session = createSession();
 
 		try {
-			session.callCurl(new File("resources/login"), 
-					new KeyValuePair("username", "JoebhJoebh@gmail.com"),
-					new KeyValuePair("password", "zxcvasdf12")
-					);
+			session.callCurl(new File("resources/login"), new KeyValuePair(
+					"username", "JoebhJoebh@gmail.com"), new KeyValuePair(
+					"password", "zxcvasdf12"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -39,9 +38,10 @@ public class JCurl {
 	public static JCurlSession createSession() {
 		return new JCurlSession();
 	}
-	
+
 	/**
 	 * Create a new session with a different starting timeout
+	 * 
 	 * @param timeout
 	 * @return
 	 */
@@ -53,15 +53,36 @@ public class JCurl {
 
 	/**
 	 * Create a new session with a timeout and a front regex
-	 * @param timeout 0 for negative, in milliseconds
-	 * @param frontRegex the front of templating regex, encapsulates variable name
-	 * @param backRegex the back of templating regex, encapsulates variable name
+	 * 
+	 * @param timeout
+	 *            0 for negative, in milliseconds
+	 * @param frontRegex
+	 *            the front of templating regex, encapsulates variable name
+	 * @param backRegex
+	 *            the back of templating regex, encapsulates variable name
 	 * @return
 	 */
-	public static JCurlSession createSession(int timeout, String frontRegex, String backRegex) {
+	public static JCurlSession createSession(int timeout, String frontRegex,
+			String backRegex) {
 		JCurlSession session = new JCurlSession();
 		session.setTimeout(timeout);
-		
+
+		session.setFrontParamDetect(frontRegex);
+		session.setBackParamDetect(backRegex);
+		return session;
+	}
+
+	/**
+	 * Create a new session with a timeout and a front regex
+	 * 
+	 * @param frontRegex
+	 *            the front of templating regex, encapsulates variable name
+	 * @param backRegex
+	 *            the back of templating regex, encapsulates variable name
+	 * @return
+	 */
+	public static JCurlSession createSession(String frontRegex, String backRegex) {
+		JCurlSession session = new JCurlSession();
 		session.setFrontParamDetect(frontRegex);
 		session.setBackParamDetect(backRegex);
 		return session;
