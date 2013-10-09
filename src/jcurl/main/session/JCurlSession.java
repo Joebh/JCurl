@@ -2,42 +2,43 @@ package jcurl.main.session;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import sun.misc.IOUtils;
 
 import jcurl.main.converter.CurlConverter;
 import jcurl.main.converter.CurlObject;
 import jcurl.main.converter.syntaxtree.Method;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+
+import sun.misc.IOUtils;
+
 public class JCurlSession {
 
-	private final Pattern cookiePattern = Pattern.compile("([^=]*)=(.*)");
 	/**
 	 * Logger
 	 */
 	private Logger log = Logger.getLogger(JCurlSession.class.getName());
-
-	/**
-	 * Current cookies
-	 */
-	private Map<String, String> currentCookies;
 
 	/**
 	 * The current response object
@@ -59,16 +60,16 @@ public class JCurlSession {
 	 */
 	private String backParamDetect = "\\}";
 
-	/** cookie manager **/
-	private CookieManager cookieManager = new CookieManager();
+	private CookieStore cookieStore = new BasicCookieStore();
+
+	private DefaultHttpClient client = new DefaultHttpClient();
 
 	/**
 	 * Create a new default JCurlSession instance timeout is infinite/0
 	 * ${variable}
 	 */
 	public JCurlSession() {
-		currentCookies = new HashMap<String, String>();
-		CookieHandler.setDefault(cookieManager);
+		client.setCookieStore(cookieStore);
 	}
 
 	/**
@@ -127,105 +128,73 @@ public class JCurlSession {
 		log.fine("Converting curl string to curl object");
 		// convert string to curl object
 		CurlObject curlObject = CurlConverter.convertCurl(curlString);
-
 		log.fine("Done converting, creating connection now");
 
-		// create the connection
-		URL url = curlObject.getUrl();
-		HttpURLConnection connection = null;
 		try {
-			HttpURLConnection
-					.setFollowRedirects(curlObject.isFollowRedirects());
-			connection = (HttpURLConnection) url.openConnection();
 
 			// set http method
-			connection.setRequestMethod(curlObject.getHttpMethod());
-			
-			connection.setDoOutput(true);
+			HttpUriRequest request = getRequestObject(
+					curlObject.getHttpMethod(), curlObject.getData());
+
+			HttpParams params = new BasicHttpParams();
+
+			// set timeout
+			HttpConnectionParams.setConnectionTimeout(params, timeout);
+
+			// set redirects
+			params.setParameter(ClientPNames.HANDLE_REDIRECTS,
+					curlObject.isFollowRedirects());
+			request.setParams(params);
 
 			log.fine("Connection created, adding headers now");
 
 			// iterate over headers and add to request properties
 			Map<String, String> headers = curlObject.getHeaders();
 			for (String key : headers.keySet()) {
-				connection.setRequestProperty(key, headers.get(key));
+				request.addHeader(key, headers.get(key));
 			}
-
-			// from previous response object get cookies
-			String cookieString = convertCookiesToString(currentCookies);
-
-			log.fine(MessageFormat
-					.format("Done adding headers, now adding cookies {0}",
-							cookieString));
-
-			// if there are previous cookies set the header
-			if (cookieString != null) {
-				connection.setRequestProperty("Cookie", cookieString);
-			}
-
-			connection.setConnectTimeout(timeout);
 
 			log.fine("Trying to connect to url");
-
 			// connect to the url
-			connection.connect();
+			HttpResponse response = client.execute(request);
 
-			log.fine("Done connection to url, getting output stream");
+			log.fine("Done connection to url, getting output");
 
-			log.fine("Writing bytes to output stream");
-
-			if (curlObject.getData() != null && !curlObject.getData().isEmpty()) {
-				OutputStream os = connection.getOutputStream();
-				os.write(curlObject.getData().getBytes());
-				os.flush();
-			}
-
-			log.fine("Done writing bytes, creating response object");
-
-			curlResponse = new CurlResponse(connection, curlObject);
+			curlResponse = new CurlResponse(response, curlObject);
 
 			log.fine(MessageFormat.format("Done creating response \n{0}\n",
 					curlResponse));
 
-			log.fine("Adding response cookies to current cookies");
-			addCookies(curlResponse.getCookies());
-
 			return curlResponse;
+		} catch (UnsupportedEncodingException e) {
+			log.log(Level.SEVERE, "", e);
+		} catch (ClientProtocolException e) {
+			log.log(Level.SEVERE, "", e);
 		} catch (IOException e) {
 			log.log(Level.SEVERE, "", e);
-		} finally {
-			if (connection != null) {
-				connection.disconnect();
-			}
 		}
 		return null;
 	}
 
-	public void addCookie(String key, String value) {
-		currentCookies.put(key, value);
+	private HttpUriRequest getRequestObject(String httpMethod, String postData)
+			throws UnsupportedEncodingException {
+		switch (httpMethod) {
+
+		case Method.POST:
+			HttpPost post = new HttpPost();
+			post.setEntity(new StringEntity(postData));
+			return post;
+		case Method.GET:
+			return new HttpGet();
+		case Method.PUT:
+			return new HttpPut();
+		default:
+			return null;
+		}
 	}
 
-	/**
-	 * Method that takes a cookie list and adds or overwrite if cookie exists
-	 * 
-	 * @param cookieString
-	 */
-	public void addCookies(List<String> cookies) {
-		if (cookies == null) {
-			return;
-		}
-		for (String cookie : cookies) {
-			String key, value;
-			// iterate over every cookie
-			// split cookie on =
-			Matcher m = cookiePattern.matcher(cookie);
-			if (m.find()) {
-				key = m.group(1).trim();
-				value = m.group(2).trim();
-				addCookie(key, value);
-			}
-
-		}
+	public void addCookie(String key, String value) {
+		cookieStore.addCookie(new BasicClientCookie(key, value));
 	}
 
 	@Override
@@ -235,29 +204,13 @@ public class JCurlSession {
 		stringBuilder.append(curlResponse);
 
 		stringBuilder.append(" CURRENT COOKIES\n----------------\n");
-		for (String key : currentCookies.keySet()) {
-			stringBuilder.append(" ").append(key).append(" : ")
-					.append(currentCookies.get(key)).append("\n");
+		for (Cookie cookie : cookieStore.getCookies()) {
+			stringBuilder.append(" ").append(cookie);
 		}
-		stringBuilder.append(" ------------\n</JCURLSESSION>\n");
+		stringBuilder.append("\n ------------\n</JCURLSESSION>\n");
 
 		return stringBuilder.toString();
 
-	}
-
-	private String convertCookiesToString(Map<String, String> cookies) {
-		if (cookies.isEmpty()) {
-			return "";
-		}
-		StringBuilder cookieString = new StringBuilder();
-
-		for (String key : cookies.keySet()) {
-			cookieString.append(key).append("=").append(cookies.get(key))
-					.append(";");
-		}
-		cookieString.deleteCharAt(cookieString.length() - 1);
-
-		return cookieString.toString();
 	}
 
 	/**

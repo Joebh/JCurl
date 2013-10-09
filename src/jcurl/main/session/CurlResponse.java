@@ -3,54 +3,35 @@ package jcurl.main.session;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.GZIPInputStream;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 
 import jcurl.main.converter.CurlObject;
 
 public class CurlResponse {
 
 	private String content;
-	private Map<String, List<String>> headers;
+	private Header[] headers;
 	private String responseMessage;
 	private int responseCode;
 
-	private List<String> cookies;
-	private Date date;
-	private int contentLength;
-	private String contentType;
-
-	public CurlResponse(HttpURLConnection connection, CurlObject curlObject)
+	public CurlResponse(HttpResponse response, CurlObject curlObject)
 			throws IOException {
-		headers = connection.getHeaderFields();
-		responseMessage = connection.getResponseMessage();
-		cookies = headers.get("Set-Cookie");
-		responseCode = connection.getResponseCode();
+		headers = response.getAllHeaders();
+		responseMessage = response.getStatusLine().getReasonPhrase();
+		responseCode = response.getStatusLine().getStatusCode();
 
 		// convert input stream to string
-		BufferedReader br = null;
-		if (curlObject.isCompressed()
-				&& "gzip".equals(connection.getContentEncoding())) {
-			br = new BufferedReader(new InputStreamReader((new GZIPInputStream(
-					connection.getInputStream()))));
-		} else {
-			br = new BufferedReader(new InputStreamReader(
-					(connection.getInputStream())));
-		}
+		BufferedReader rd = new BufferedReader(new InputStreamReader(response
+				.getEntity().getContent()));
 
-		StringBuilder outputBuilder = new StringBuilder();
-		String output;
-		while ((output = br.readLine()) != null) {
-			outputBuilder.append(output);
+		StringBuffer result = new StringBuffer();
+		String line = "";
+		while ((line = rd.readLine()) != null) {
+			result.append(line);
 		}
+		content = result.toString();
 
-		content = outputBuilder.toString();
-		date = new Date(connection.getDate());
-		contentLength = connection.getContentLength();
-		contentType = connection.getContentType();
 	}
 
 	@Override
@@ -62,25 +43,12 @@ public class CurlResponse {
 				.append("\n");
 		stringBuilder.append("responseMessage : ").append(responseMessage)
 				.append("\n");
-		stringBuilder.append("date : ").append(date).append("\n");
-		stringBuilder.append("contentLength : ").append(contentLength)
-				.append("\n");
-		stringBuilder.append("contentType : ").append(contentType).append("\n");
 
 		stringBuilder.append(" ---headers---\n");
-		for (String key : headers.keySet()) {
-			stringBuilder.append(key).append(" : ").append(headers.get(key))
-					.append("\n");
+		for (Header header : headers) {
+			stringBuilder.append("   ** ").append(header).append("\n");
 		}
 		stringBuilder.append(" ---end headers---\n");
-
-		stringBuilder.append(" ---cookies---\n");
-		if (cookies != null) {
-			for (String cookie : cookies) {
-				stringBuilder.append(cookie).append("\n");
-			}
-		}
-		stringBuilder.append(" ---end cookies---\n");
 
 		stringBuilder.append("</CURL RESPONSE>\n");
 		return stringBuilder.toString();
@@ -92,18 +60,6 @@ public class CurlResponse {
 
 	public int getResponseCode() {
 		return responseCode;
-	}
-
-	public Map<String, List<String>> getHeaders() {
-		return headers;
-	}
-
-	public List<String> getCookies() {
-		return cookies;
-	}
-
-	public void setCookies(List<String> cookies) {
-		this.cookies = cookies;
 	}
 
 	public String getResponseMessage() {
