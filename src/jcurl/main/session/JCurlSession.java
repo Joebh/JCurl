@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -57,16 +59,21 @@ public class JCurlSession {
 	 */
 	private String backParamDetect = "\\}";
 
+	/** cookie manager **/
+	private CookieManager cookieManager = new CookieManager();
+
 	/**
 	 * Create a new default JCurlSession instance timeout is infinite/0
 	 * ${variable}
 	 */
 	public JCurlSession() {
 		currentCookies = new HashMap<String, String>();
+		CookieHandler.setDefault(cookieManager);
 	}
 
 	/**
 	 * Input a file that contains curl string
+	 * 
 	 * @Todo add caching of file string
 	 * @param curlFile
 	 * @param args
@@ -127,12 +134,12 @@ public class JCurlSession {
 		URL url = curlObject.getUrl();
 		HttpURLConnection connection = null;
 		try {
+			HttpURLConnection
+					.setFollowRedirects(curlObject.isFollowRedirects());
 			connection = (HttpURLConnection) url.openConnection();
 
 			// set http method
 			connection.setRequestMethod(curlObject.getHttpMethod());
-			
-			connection.setFollowRedirects(curlObject.isFollowRedirects());
 			
 			connection.setDoOutput(true);
 
