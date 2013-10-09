@@ -15,6 +15,7 @@ import jcurl.main.converter.syntaxtree.URL;
 import jcurl.main.converter.syntaxtree.flags.Compressed;
 import jcurl.main.converter.syntaxtree.flags.Data;
 import jcurl.main.converter.syntaxtree.flags.H;
+import jcurl.main.converter.syntaxtree.flags.L;
 
 public class CurlObjectBuilderVisitor implements Visitor {
 
@@ -47,7 +48,6 @@ public class CurlObjectBuilderVisitor implements Visitor {
 
 	@Override
 	public void accept(Method method) {
-		// TODO Auto-generated method stub
 		curlObject.setHttpMethod(method.getType());
 	}
 
@@ -75,6 +75,12 @@ public class CurlObjectBuilderVisitor implements Visitor {
 	public void accept(Data data) {
 		// TODO Auto-generated method stub
 		curlObject.setData(data.getData());
+	}
+
+	@Override
+	public void accept(L l) {
+		// TODO Auto-generated method stub
+		curlObject.setFollowRedirects(true);
 	}
 
 }

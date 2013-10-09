@@ -9,6 +9,15 @@ public class CurlObject {
 	private URL url;
 	private Map<String, String> headers;
 	private boolean compressed = false;
+	private boolean followRedirects = false;
+	public boolean isFollowRedirects() {
+		return followRedirects;
+	}
+
+	public void setFollowRedirects(boolean followRedirects) {
+		this.followRedirects = followRedirects;
+	}
+
 	private String httpMethod;
 	private String data;
 
@@ -25,6 +34,7 @@ public class CurlObject {
 		stringBuilder.append("  Compressed : ").append(compressed).append("\n");
 		stringBuilder.append("  Method : ").append(httpMethod).append("\n");
 		stringBuilder.append("  Data : ").append(data).append("\n");
+		stringBuilder.append("  Follow Redirects : ").append(followRedirects).append("\n");
 
 		stringBuilder.append(" </CURL REQUEST OBJECT>\n");
 		return stringBuilder.toString();

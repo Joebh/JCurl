@@ -22,6 +22,7 @@ import sun.misc.IOUtils;
 
 import jcurl.main.converter.CurlConverter;
 import jcurl.main.converter.CurlObject;
+import jcurl.main.converter.syntaxtree.Method;
 
 public class JCurlSession {
 
@@ -64,6 +65,14 @@ public class JCurlSession {
 		currentCookies = new HashMap<String, String>();
 	}
 
+	/**
+	 * Input a file that contains curl string
+	 * @Todo add caching of file string
+	 * @param curlFile
+	 * @param args
+	 * @return
+	 * @throws IOException
+	 */
 	public CurlResponse callCurl(File curlFile, KeyValuePair... args)
 			throws IOException {
 		FileInputStream fis = new FileInputStream(curlFile);
@@ -122,7 +131,9 @@ public class JCurlSession {
 
 			// set http method
 			connection.setRequestMethod(curlObject.getHttpMethod());
-
+			
+			connection.setFollowRedirects(curlObject.isFollowRedirects());
+			
 			connection.setDoOutput(true);
 
 			log.fine("Connection created, adding headers now");

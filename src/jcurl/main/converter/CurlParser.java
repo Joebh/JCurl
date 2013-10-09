@@ -8,6 +8,7 @@ import jcurl.main.converter.syntaxtree.URL;
 import jcurl.main.converter.syntaxtree.flags.Compressed;
 import jcurl.main.converter.syntaxtree.flags.Data;
 import jcurl.main.converter.syntaxtree.flags.H;
+import jcurl.main.converter.syntaxtree.flags.L;
 import jcurl.main.converter.tokens.CurlToken;
 import jcurl.main.converter.tokens.EOFToken;
 import jcurl.main.converter.tokens.ErrorToken;
@@ -71,7 +72,13 @@ public class CurlParser {
 			curl.addFlag(new Compressed());
 		}
 		
+		if( "-L".equals(type)){
+			log.fine("Adding Redirect Flag");
+			curl.addFlag(new L());
+		}		
+		
 		if("--data".equals(type)){
+			curl.setMethod(new Method(Method.POST));
 			Token token = lexer.nextToken();
 			if (token.getClass() == ErrorToken.class) {
 				log.severe("Error Parsing Data String");
