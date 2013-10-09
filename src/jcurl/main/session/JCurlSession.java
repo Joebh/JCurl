@@ -116,10 +116,9 @@ public class JCurlSession {
 
 		// create the connection
 		URL url = curlObject.getUrl();
-		OutputStream os = null;
+		HttpURLConnection connection = null;
 		try {
-			HttpURLConnection connection = (HttpURLConnection) url
-					.openConnection();
+			connection = (HttpURLConnection) url.openConnection();
 
 			// set http method
 			connection.setRequestMethod(curlObject.getHttpMethod());
@@ -155,12 +154,12 @@ public class JCurlSession {
 
 			log.fine("Done connection to url, getting output stream");
 
-			os = connection.getOutputStream();
-
 			log.fine("Writing bytes to output stream");
 
 			if (curlObject.getData() != null && !curlObject.getData().isEmpty()) {
+				OutputStream os = connection.getOutputStream();
 				os.write(curlObject.getData().getBytes());
+				os.flush();
 			}
 
 			log.fine("Done writing bytes, creating response object");
@@ -173,18 +172,12 @@ public class JCurlSession {
 			log.fine("Adding response cookies to current cookies");
 			addCookies(curlResponse.getCookies());
 
-			connection.disconnect();
-
 			return curlResponse;
 		} catch (IOException e) {
 			log.log(Level.SEVERE, "", e);
 		} finally {
-			if (os != null) {
-				try {
-					os.close();
-				} catch (IOException e) {
-					log.log(Level.SEVERE, "", e);
-				}
+			if (connection != null) {
+				connection.disconnect();
 			}
 		}
 		return null;
