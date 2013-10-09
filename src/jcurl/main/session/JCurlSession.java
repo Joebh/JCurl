@@ -131,10 +131,8 @@ public class JCurlSession {
 		log.fine("Done converting, creating connection now");
 
 		try {
-
 			// set http method
-			HttpUriRequest request = getRequestObject(
-					curlObject.getHttpMethod(), curlObject.getData());
+			HttpUriRequest request = getRequestObject(curlObject);
 
 			HttpParams params = new BasicHttpParams();
 
@@ -176,18 +174,20 @@ public class JCurlSession {
 		return null;
 	}
 
-	private HttpUriRequest getRequestObject(String httpMethod, String postData)
+	private HttpUriRequest getRequestObject(CurlObject curlObject)
 			throws UnsupportedEncodingException {
-		switch (httpMethod) {
+		switch (curlObject.getHttpMethod()) {
 
 		case Method.POST:
-			HttpPost post = new HttpPost();
-			post.setEntity(new StringEntity(postData));
+			HttpPost post = new HttpPost(curlObject.getUrl());
+			post.setEntity(new StringEntity(curlObject.getData()));
 			return post;
 		case Method.GET:
-			return new HttpGet();
+			return new HttpGet(curlObject.getUrl());
 		case Method.PUT:
-			return new HttpPut();
+			HttpPut put = new HttpPut(curlObject.getUrl());
+			put.setEntity(new StringEntity(curlObject.getData()));
+			return put;
 		default:
 			return null;
 		}

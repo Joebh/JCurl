@@ -1,8 +1,6 @@
 package jcurl.main.converter.visitors;
 
-import java.net.MalformedURLException;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,8 +18,9 @@ import jcurl.main.converter.syntaxtree.flags.L;
 public class CurlObjectBuilderVisitor implements Visitor {
 
 	private CurlObject curlObject;
-	
-	private static Logger log = Logger.getLogger(CurlObjectBuilderVisitor.class.getName());
+
+	private static Logger log = Logger.getLogger(CurlObjectBuilderVisitor.class
+			.getName());
 
 	public CurlObject getCurlObject() {
 		return curlObject;
@@ -39,11 +38,7 @@ public class CurlObjectBuilderVisitor implements Visitor {
 
 	@Override
 	public void accept(URL url) {
-		try {
-			curlObject.setUrl(new java.net.URL(url.getUrl()));
-		} catch (MalformedURLException e) {
-			log.log(Level.SEVERE, null, e);
-		}
+		curlObject.setUrl(url.getUrl());
 	}
 
 	@Override

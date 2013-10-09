@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class CurlObject {
 
-	private URL url;
+	private String url;
 	private Map<String, String> headers;
 	private boolean compressed = false;
 	private boolean followRedirects = false;
@@ -60,11 +60,11 @@ public class CurlObject {
 		this.httpMethod = httpMethod;
 	}
 
-	public URL getUrl() {
+	public String getUrl() {
 		return url;
 	}
 
-	public void setUrl(URL url) {
+	public void setUrl(String url) {
 		this.url = url;
 	}
 
