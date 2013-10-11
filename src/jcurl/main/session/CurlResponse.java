@@ -3,6 +3,8 @@ package jcurl.main.session;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.zip.GZIPInputStream;
+
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 
@@ -24,8 +26,8 @@ public class CurlResponse {
 		// convert input stream to string
 		BufferedReader rd = null;
 		if (curlObject.isCompressed()) {
-			rd = new BufferedReader(new InputStreamReader(response.getEntity()
-					.getContent()));
+			rd = new BufferedReader(new InputStreamReader(new GZIPInputStream(
+					response.getEntity().getContent())));
 		} else {
 			rd = new BufferedReader(new InputStreamReader(response.getEntity()
 					.getContent()));
