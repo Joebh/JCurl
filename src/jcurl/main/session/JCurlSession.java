@@ -22,10 +22,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -70,6 +72,7 @@ public class JCurlSession {
 	 */
 	public JCurlSession() {
 		client.setCookieStore(cookieStore);
+		client.setRedirectStrategy(new LaxRedirectStrategy());
 	}
 
 	/**
@@ -140,8 +143,7 @@ public class JCurlSession {
 			HttpConnectionParams.setConnectionTimeout(params, timeout);
 
 			// set redirects
-			params.setParameter(ClientPNames.HANDLE_REDIRECTS,
-					curlObject.isFollowRedirects());
+			HttpClientParams.setRedirecting(params, curlObject.isFollowRedirects());
 			request.setParams(params);
 
 			log.fine("Connection created, adding headers now");
@@ -205,9 +207,9 @@ public class JCurlSession {
 
 		stringBuilder.append(" CURRENT COOKIES\n----------------\n");
 		for (Cookie cookie : cookieStore.getCookies()) {
-			stringBuilder.append(" ").append(cookie);
+			stringBuilder.append(" ++ ").append(cookie).append("\n");
 		}
-		stringBuilder.append("\n ------------\n</JCURLSESSION>\n");
+		stringBuilder.append(" ------------\n</JCURLSESSION>\n");
 
 		return stringBuilder.toString();
 
