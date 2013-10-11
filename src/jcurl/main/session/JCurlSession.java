@@ -20,6 +20,7 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
@@ -133,9 +134,10 @@ public class JCurlSession {
 		CurlObject curlObject = CurlConverter.convertCurl(curlString);
 		log.fine("Done converting, creating connection now");
 
+		HttpRequestBase request = null;
 		try {
 			// set http method
-			HttpUriRequest request = getRequestObject(curlObject);
+			request = getRequestObject(curlObject);
 
 			HttpParams params = new BasicHttpParams();
 
@@ -143,7 +145,8 @@ public class JCurlSession {
 			HttpConnectionParams.setConnectionTimeout(params, timeout);
 
 			// set redirects
-			HttpClientParams.setRedirecting(params, curlObject.isFollowRedirects());
+			HttpClientParams.setRedirecting(params,
+					curlObject.isFollowRedirects());
 			request.setParams(params);
 
 			log.fine("Connection created, adding headers now");
@@ -172,11 +175,15 @@ public class JCurlSession {
 			log.log(Level.SEVERE, "", e);
 		} catch (IOException e) {
 			log.log(Level.SEVERE, "", e);
+		} finally {
+			if (request != null) {
+				request.releaseConnection();
+			}
 		}
 		return null;
 	}
 
-	private HttpUriRequest getRequestObject(CurlObject curlObject)
+	private HttpRequestBase getRequestObject(CurlObject curlObject)
 			throws UnsupportedEncodingException {
 		switch (curlObject.getHttpMethod()) {
 
@@ -188,6 +195,7 @@ public class JCurlSession {
 			return new HttpGet(curlObject.getUrl());
 		case Method.PUT:
 			HttpPut put = new HttpPut(curlObject.getUrl());
+
 			put.setEntity(new StringEntity(curlObject.getData()));
 			return put;
 		default:
