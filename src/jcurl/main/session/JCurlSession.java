@@ -2,7 +2,6 @@ package jcurl.main.session;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -19,22 +18,20 @@ import jcurl.main.converter.syntaxtree.Method;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 
 import sun.misc.IOUtils;
 
@@ -67,15 +64,17 @@ public class JCurlSession {
 
 	private CookieStore cookieStore = new BasicCookieStore();
 
-	private DefaultHttpClient client = new DefaultHttpClient();
+	private CloseableHttpClient client;
 
 	/**
 	 * Create a new default JCurlSession instance timeout is infinite/0
 	 * ${variable}
 	 */
 	public JCurlSession() {
-		client.setCookieStore(cookieStore);
-		client.setRedirectStrategy(new LaxRedirectStrategy());
+		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+		client = HttpClients.custom().setConnectionManager(cm)
+				.setRedirectStrategy(new LaxRedirectStrategy())
+				.setDefaultCookieStore(cookieStore).build();
 	}
 
 	/**
@@ -148,15 +147,9 @@ public class JCurlSession {
 			// set http method
 			request = getRequestObject(curlObject);
 
-			HttpParams params = new BasicHttpParams();
-
-			// set timeout
-			HttpConnectionParams.setConnectionTimeout(params, timeout);
-
-			// set redirects
-			HttpClientParams.setRedirecting(params,
-					curlObject.isFollowRedirects());
-			request.setParams(params);
+			request.setConfig(RequestConfig.custom()
+					.setRedirectsEnabled(curlObject.isFollowRedirects())
+					.setConnectTimeout(timeout).build());
 
 			log.fine("Connection created, adding headers now");
 
@@ -167,8 +160,11 @@ public class JCurlSession {
 			}
 
 			log.fine("Trying to connect to url");
+
 			// connect to the url
-			HttpResponse response = client.execute(request);
+			HttpClientContext context = HttpClientContext.create();
+			
+			HttpResponse response = client.execute(request, context);
 
 			log.fine("Done connection to url, getting output");
 
