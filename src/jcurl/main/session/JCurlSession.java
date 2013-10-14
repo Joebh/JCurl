@@ -2,6 +2,7 @@ package jcurl.main.session;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jcurl.main.ScrapeException;
 import jcurl.main.converter.CurlConverter;
 import jcurl.main.converter.CurlObject;
 import jcurl.main.converter.syntaxtree.Method;
@@ -86,12 +88,19 @@ public class JCurlSession {
 	 * @throws IOException
 	 */
 	public CurlResponse callCurl(File curlFile, KeyValuePair... args)
-			throws IOException {
-		FileInputStream fis = new FileInputStream(curlFile);
-		String curlString = new String(IOUtils.readFully(fis, -1, true),
-				Charset.forName("UTF-8"));
-		log.info(MessageFormat.format("Read curl string {0}", curlString));
-		return callCurl(curlString, args);
+			throws ScrapeException {
+		FileInputStream fis;
+		String curlString;
+		try {
+			fis = new FileInputStream(curlFile);
+			curlString = new String(IOUtils.readFully(fis, -1, true),
+					Charset.forName("UTF-8"));
+			log.info(MessageFormat.format("Read curl string {0}", curlString));
+			return callCurl(curlString, args);
+		} catch (IOException e) {
+			throw new ScrapeException(e);
+		}
+
 	}
 
 	public String getFrontParamDetect() {

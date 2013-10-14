@@ -25,7 +25,8 @@ public class CurlResponse {
 
 		// convert input stream to string
 		BufferedReader rd = null;
-		if (curlObject.isCompressed()) {
+		Header contentEncoding = response.getFirstHeader("Content-Encoding");
+		if (curlObject.isCompressed() && contentEncoding != null && contentEncoding.getValue().contains("gzip")) {
 			rd = new BufferedReader(new InputStreamReader(new GZIPInputStream(
 					response.getEntity().getContent())));
 		} else {
