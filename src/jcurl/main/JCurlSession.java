@@ -36,12 +36,10 @@ import sun.misc.IOUtils;
 
 public class JCurlSession {
 
-
 	/**
 	 * Logger
 	 */
 	private Logger log = Logger.getLogger(JCurlSession.class.getName());
-
 
 	/**
 	 * The timeout of each curl call
@@ -59,7 +57,7 @@ public class JCurlSession {
 	private String backParamDetect = "\\}";
 
 	private CookieStore cookieStore = new BasicCookieStore();
-	
+
 	private PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();;
 
 	private CloseableHttpClient client;
@@ -73,12 +71,12 @@ public class JCurlSession {
 				.setRedirectStrategy(new LaxRedirectStrategy())
 				.setDefaultCookieStore(cookieStore).build();
 	}
-	
-	public void setMaxThreads(int maxThreads){
+
+	public void setMaxThreads(int maxThreads) {
 		cm.setMaxTotal(maxThreads);
 	}
-	
-	public void setMaxThreadsPerRoute(int maxThreads){
+
+	public void setMaxThreadsPerRoute(int maxThreads) {
 		cm.setDefaultMaxPerRoute(maxThreads);
 	}
 
@@ -123,7 +121,8 @@ public class JCurlSession {
 		this.backParamDetect = backParamDetect;
 	}
 
-	public JCurlResponse callCurl(String curlString, KeyValuePair... args) throws ScrapeException {
+	public JCurlResponse callCurl(String curlString, KeyValuePair... args)
+			throws ScrapeException {
 		for (KeyValuePair pair : args) {
 			curlString = curlString.replaceAll(frontParamDetect + pair.getKey()
 					+ backParamDetect, pair.getValue());
@@ -137,7 +136,7 @@ public class JCurlSession {
 	 * response object
 	 * 
 	 * @param curlString
-	 * @throws ScrapeException 
+	 * @throws ScrapeException
 	 * @throws IOException
 	 */
 	private JCurlResponse callCurl(String curlString) throws ScrapeException {
@@ -169,7 +168,7 @@ public class JCurlSession {
 
 			// connect to the url
 			HttpClientContext context = HttpClientContext.create();
-			
+
 			HttpResponse response = client.execute(request, context);
 
 			log.fine("Done connection to url, getting output");
@@ -198,22 +197,23 @@ public class JCurlSession {
 
 	private HttpRequestBase getRequestObject(CurlObject curlObject)
 			throws UnsupportedEncodingException {
-		switch (curlObject.getHttpMethod()) {
+		String meth = curlObject.getHttpMethod();
 
-		case Method.POST:
+		if (Method.POST.equals(meth)) {
 			HttpPost post = new HttpPost(curlObject.getUrl());
 			post.setEntity(new StringEntity(curlObject.getData()));
 			return post;
-		case Method.GET:
+		}
+		if (Method.GET.equals(meth)) {
 			return new HttpGet(curlObject.getUrl());
-		case Method.PUT:
+		}
+		if (Method.PUT.equals(meth)) {
 			HttpPut put = new HttpPut(curlObject.getUrl());
 
 			put.setEntity(new StringEntity(curlObject.getData()));
 			return put;
-		default:
-			return null;
 		}
+		return null;
 	}
 
 	public void addCookie(String key, String value) {
