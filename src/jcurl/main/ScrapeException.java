@@ -8,7 +8,7 @@ public class ScrapeException extends Exception{
 		super(message);
 	}
 
-	public ScrapeException(IOException e) {
+	public ScrapeException(Exception e) {
 		super(e);
 	}
 

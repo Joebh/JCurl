@@ -1,7 +1,5 @@
 package jcurl.main;
 
-import jcurl.main.session.JCurlSession;
-
 public class JCurl {
 
 	/**
@@ -22,6 +20,24 @@ public class JCurl {
 	public static JCurlSession createSession(int timeout) {
 		JCurlSession session = new JCurlSession();
 		session.setTimeout(timeout);
+		return session;
+	}
+
+	/**
+	 * 
+	 * @param timeout
+	 * @param maxThreads
+	 *            max Connection threads
+	 * @param maxThreadsPerRoute
+	 *            max connection threads per route
+	 * @return
+	 */
+	public static JCurlSession createSession(int timeout, int maxThreads,
+			int maxThreadsPerRoute) {
+		JCurlSession session = new JCurlSession();
+		session.setTimeout(timeout);
+		session.setMaxThreads(maxThreads);
+		session.setMaxThreadsPerRoute(maxThreadsPerRoute);
 		return session;
 	}
 
@@ -49,14 +65,24 @@ public class JCurl {
 	/**
 	 * Create a new session with a timeout and a front regex
 	 * 
+	 * @param timeout
+	 *            0 for negative, in milliseconds
+	 * @param maxThreads
+	 *            max Connection threads
+	 * @param maxThreadsPerRoute
+	 *            max connection threads per route
 	 * @param frontRegex
 	 *            the front of templating regex, encapsulates variable name
 	 * @param backRegex
 	 *            the back of templating regex, encapsulates variable name
 	 * @return
 	 */
-	public static JCurlSession createSession(String frontRegex, String backRegex) {
+	public static JCurlSession createSession(int timeout, int maxThreads,
+			int maxThreadsPerRoute, String frontRegex, String backRegex) {
 		JCurlSession session = new JCurlSession();
+		session.setTimeout(timeout);
+		session.setMaxThreads(maxThreads);
+		session.setMaxThreadsPerRoute(maxThreadsPerRoute);
 		session.setFrontParamDetect(frontRegex);
 		session.setBackParamDetect(backRegex);
 		return session;

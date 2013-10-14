@@ -1,4 +1,4 @@
-package jcurl.main.session;
+package jcurl.main;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,14 +10,14 @@ import org.apache.http.HttpResponse;
 
 import jcurl.main.converter.CurlObject;
 
-public class CurlResponse {
+public class JCurlResponse {
 
 	private String content;
 	private Header[] headers;
 	private String responseMessage;
 	private int responseCode;
 
-	public CurlResponse(HttpResponse response, CurlObject curlObject)
+	public JCurlResponse(HttpResponse response, CurlObject curlObject)
 			throws IOException {
 		headers = response.getAllHeaders();
 		responseMessage = response.getStatusLine().getReasonPhrase();

@@ -1,4 +1,4 @@
-package jcurl.main.session;
+package jcurl.main;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jcurl.main.ScrapeException;
 import jcurl.main.converter.CurlConverter;
 import jcurl.main.converter.CurlObject;
 import jcurl.main.converter.syntaxtree.Method;
@@ -37,15 +36,12 @@ import sun.misc.IOUtils;
 
 public class JCurlSession {
 
+
 	/**
 	 * Logger
 	 */
 	private Logger log = Logger.getLogger(JCurlSession.class.getName());
 
-	/**
-	 * The current response object
-	 */
-	private CurlResponse curlResponse;
 
 	/**
 	 * The timeout of each curl call
@@ -63,6 +59,8 @@ public class JCurlSession {
 	private String backParamDetect = "\\}";
 
 	private CookieStore cookieStore = new BasicCookieStore();
+	
+	private PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();;
 
 	private CloseableHttpClient client;
 
@@ -70,11 +68,18 @@ public class JCurlSession {
 	 * Create a new default JCurlSession instance timeout is infinite/0
 	 * ${variable}
 	 */
-	public JCurlSession() {
-		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+	JCurlSession() {
 		client = HttpClients.custom().setConnectionManager(cm)
 				.setRedirectStrategy(new LaxRedirectStrategy())
 				.setDefaultCookieStore(cookieStore).build();
+	}
+	
+	public void setMaxThreads(int maxThreads){
+		cm.setMaxTotal(maxThreads);
+	}
+	
+	public void setMaxThreadsPerRoute(int maxThreads){
+		cm.setDefaultMaxPerRoute(maxThreads);
 	}
 
 	/**
@@ -86,7 +91,7 @@ public class JCurlSession {
 	 * @return
 	 * @throws IOException
 	 */
-	public CurlResponse callCurl(File curlFile, KeyValuePair... args)
+	public JCurlResponse callCurl(File curlFile, KeyValuePair... args)
 			throws ScrapeException {
 		FileInputStream fis;
 		String curlString;
@@ -118,7 +123,7 @@ public class JCurlSession {
 		this.backParamDetect = backParamDetect;
 	}
 
-	public CurlResponse callCurl(String curlString, KeyValuePair... args) {
+	public JCurlResponse callCurl(String curlString, KeyValuePair... args) throws ScrapeException {
 		for (KeyValuePair pair : args) {
 			curlString = curlString.replaceAll(frontParamDetect + pair.getKey()
 					+ backParamDetect, pair.getValue());
@@ -132,9 +137,10 @@ public class JCurlSession {
 	 * response object
 	 * 
 	 * @param curlString
+	 * @throws ScrapeException 
 	 * @throws IOException
 	 */
-	private CurlResponse callCurl(String curlString) {
+	private JCurlResponse callCurl(String curlString) throws ScrapeException {
 		log.fine(MessageFormat.format("Calling curl string {0}", curlString));
 
 		log.fine("Converting curl string to curl object");
@@ -168,7 +174,7 @@ public class JCurlSession {
 
 			log.fine("Done connection to url, getting output");
 
-			curlResponse = new CurlResponse(response, curlObject);
+			JCurlResponse curlResponse = new JCurlResponse(response, curlObject);
 
 			log.fine(MessageFormat.format("Done creating response \n{0}\n",
 					curlResponse));
@@ -176,16 +182,18 @@ public class JCurlSession {
 			return curlResponse;
 		} catch (UnsupportedEncodingException e) {
 			log.log(Level.SEVERE, "", e);
+			throw new ScrapeException(e);
 		} catch (ClientProtocolException e) {
 			log.log(Level.SEVERE, "", e);
+			throw new ScrapeException(e);
 		} catch (IOException e) {
 			log.log(Level.SEVERE, "", e);
+			throw new ScrapeException(e);
 		} finally {
 			if (request != null) {
 				request.releaseConnection();
 			}
 		}
-		return null;
 	}
 
 	private HttpRequestBase getRequestObject(CurlObject curlObject)
@@ -216,8 +224,6 @@ public class JCurlSession {
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("\n<JCURLSESSION>\n");
-		stringBuilder.append(curlResponse);
-
 		stringBuilder.append(" CURRENT COOKIES\n----------------\n");
 		for (Cookie cookie : cookieStore.getCookies()) {
 			stringBuilder.append(" ++ ").append(cookie).append("\n");
@@ -271,10 +277,6 @@ public class JCurlSession {
 			this.value = value;
 		}
 
-	}
-
-	public CurlResponse getCurlResponse() {
-		return curlResponse;
 	}
 
 }
